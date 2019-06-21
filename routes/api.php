@@ -13,6 +13,14 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::get('groups', function() { return App\Group::all(); });
+
+Route::post('groups', function(Request $request) {
+    $group = new App\Group($request->all());
+    $group->save();
+    return $group;
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
