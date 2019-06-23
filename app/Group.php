@@ -13,4 +13,8 @@ class Group extends Model
     public function members() {
         return $this->belongsToMany('App\GroupMember', 'group_groupmember', 'group', 'groupmember');
     }
+
+    public function transactions() {
+        return $this->hasMany('App\Transaction', 'group');
+    }
 }

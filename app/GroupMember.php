@@ -41,4 +41,12 @@ class GroupMember extends Authenticatable
     public function groups() {
         return $this->belongsToMany('App\Group', 'group_groupmember', 'groupmember', 'group');
     }
+
+    public function transactions() {
+        return $this->hasMany('App\Transaction', 'creator');
+    }
+
+    public function splits() {
+        return $this->hasMany('App\Split', 'debtor');
+    }
 }
