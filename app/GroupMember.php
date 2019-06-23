@@ -16,7 +16,7 @@ class GroupMember extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'api_token'
     ];
 
     /**
@@ -25,7 +25,7 @@ class GroupMember extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token', 'api_token'
     ];
 
     /**
@@ -36,4 +36,8 @@ class GroupMember extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function groups() {
+        return $this->belongsToMany('App\Group', 'group_groupmember', 'groupmember', 'group');
+    }
 }
