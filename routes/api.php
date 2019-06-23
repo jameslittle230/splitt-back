@@ -46,6 +46,15 @@ Route::group(['middleware' => ['auth:api']], function() {
         
         $user = $request->user();
         $group->members()->save($user);
+        $nonMemberEmails = [];
+        foreach ($request->members as $email) {
+            $member = App\GroupMember::where('email', $email)->first();
+            if($member) {
+                $group->members()->save($member);
+            } else {
+                $nonMemberEmails[] = $email;
+            }
+        }
         // $group->members()->findOrNew($request->users);
         $group->save();
         
