@@ -14,13 +14,13 @@ class CreateSplitsTable extends Migration
     public function up()
     {
         Schema::create('splits', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->timestamps();
-            $table->unsignedBigInteger('transaction');
+            $table->uuid('transaction');
             $table->foreign('transaction')->references('id')->on('transactions');
             $table->integer('amount');
             $table->integer('percentage');
-            $table->unsignedBigInteger('debtor');
+            $table->uuid('debtor');
             $table->foreign('debtor')->references('id')->on('group_members');
             $table->boolean('reconciled')->default(false);
         });
@@ -33,6 +33,11 @@ class CreateSplitsTable extends Migration
      */
     public function down()
     {
+        Schema::table('splits', function(Blueprint $table) {
+            $table->dropForeign('transaction');
+            $table->dropForeign('debtor');
+        });
+
         Schema::dropIfExists('splits');
     }
 }

@@ -17,10 +17,10 @@ class CreateGroupMemberPivotTable extends Migration
             $table->bigIncrements('id');
             $table->timestamps();
 
-            $table->unsignedBigInteger('group');
+            $table->uuid('group');
             $table->foreign('group')->references('id')->on('groups');
 
-            $table->unsignedBigInteger('groupmember');
+            $table->uuid('groupmember');
             $table->foreign('groupmember')->references('id')->on('group_members');
         });
     }
@@ -32,6 +32,11 @@ class CreateGroupMemberPivotTable extends Migration
      */
     public function down()
     {
+        Schema::table('group_groupmember', function(Blueprint $table) {
+            $table->dropForeign('groupmember');
+            $table->dropForeign('group');
+        });
+
         Schema::dropIfExists('group_groupmember');
     }
 }

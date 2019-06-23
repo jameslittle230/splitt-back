@@ -14,13 +14,13 @@ class CreateTransactionsTable extends Migration
     public function up()
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->uuid('id')->primary();
             $table->timestamps();
             $table->integer('full_amount');
             $table->string('description');
-            $table->unsignedBigInteger('creator');
+            $table->uuid('creator');
             $table->foreign('creator')->references('id')->on('group_members');
-            $table->unsignedBigInteger('group');
+            $table->uuid('group');
             $table->foreign('group')->references('id')->on('groups');
         });
     }
@@ -32,6 +32,11 @@ class CreateTransactionsTable extends Migration
      */
     public function down()
     {
+        Schema::table('transactions', function(Blueprint $table) {
+            $table->dropForeign('creator');
+            $table->dropForeign('group');
+        });
+        
         Schema::dropIfExists('transactions');
     }
 }

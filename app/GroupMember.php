@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class GroupMember extends Authenticatable
 {
     use Notifiable;
+    use UsesUuid;
 
     /**
      * The attributes that are mass assignable.
