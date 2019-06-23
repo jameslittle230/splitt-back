@@ -62,15 +62,52 @@ Route::group(['middleware' => ['auth:api']], function() {
         return App\Group::with('members')->findOrFail($group->id);
     });
 
-    Route::put('groups/{id}', function(Request $request) {
-        $group = App\Group::with('members')->findOrFail($id);
+    // Route::put('groups/{id}', function(Request $request) {
+    //     $group = App\Group::with('members')->findOrFail($id);
+    //     $user = $request->user();
+    //     if ($group->members()->get()->contains($user)) {
+    //         // make the changes & save the group
+    //         return $group;
+    //     } else {
+    //         abort(403);
+    //     }
+    // });
+
+    Route::post('groups/{id}/transactions', function(Request $request, $id) {
+        $group = App\Group::findOrFail($id);
         $user = $request->user();
-        if ($group->members()->get()->contains($user)) {
-            // make the changes & save the group
-            return $group;
-        } else {
-            abort(403);
-        }
+
+        $txn = new App\Transaction();
+        $txn->fill([
+            'full_amount' => $request->full_amount,
+            'description' => $request->description,
+        ]);
+
+        // It seems like the relationship stuff should deal with
+        // extracting the IDs for me, instead of me having to
+        // do it myself here?
+        $txn->creator = $user->id;
+        $txn->group = $group->id;
+
+        $txn->save();
+
+        $splits = $group->members()->get()->map(function($member) use ($txn, $user, $request, $group) {
+            if ($member->is($user)) {return null;}
+
+            return [
+                'transaction' => $txn->id,
+                'amount' => (int)($request->full_amount) / ($group->members()->count() - 1),
+                'percentage' => 100 / ($group->members()->count() - 1),
+                'debtor' => $member->id,
+            ];
+        })->filter()->toArray();
+
+        // dd($splits);
+
+        $txn->splits()->createMany($splits);
+
+        // I wish I didn't have to make another DB query here
+        return App\Transaction::with('splits')->findOrFail($txn->id);
     });
 
     Route::get('groups/{id}', function(Request $request, $id) {
