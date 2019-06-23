@@ -61,7 +61,7 @@ Route::group(['middleware' => ['auth:api']], function() {
     });
 
     Route::get('groups/{id}', function(Request $request, $id) {
-        $group = App\Group::with('members')->findOrFail($id);
+        $group = App\Group::with('members')->with('transactions')->findOrFail($id);
         $user = $request->user();
         if ($group->members()->get()->contains($user)) {
             return $group;
