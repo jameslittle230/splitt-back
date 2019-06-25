@@ -41,7 +41,7 @@ Route::group(['middleware' => ['auth:api']], function() {
         return App\GroupMember::with('groups')
             ->with('transactions')
             ->with('splits')
-            ->find($request->user());
+            ->find($request->user())->first();
     });
     
     Route::post('groups', function(Request $request) {
