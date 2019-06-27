@@ -60,7 +60,11 @@ Route::group(['middleware' => ['auth:api']], function () {
         $group->save();
 
         // I wish I didn't have to make another DB query here
-        return App\Group::with('members')->findOrFail($group->id);
+        $group = App\Group::with('members')->findOrFail($group->id);
+        return collect([
+            'group' => $group,
+            'nonMemberEmails' => $nonMemberEmails,
+        ]);
     });
 
     Route::post('groups/{id}/transactions', function (Request $request, $id) {
