@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('login', function(Request $request) {
+Route::post('login', function (Request $request) {
     $credentials = $request->only('email', 'password');
     if (Auth::guard('web')->attempt($credentials)) {
         $user = Auth::guard('web')->user();
@@ -25,7 +25,7 @@ Route::post('login', function(Request $request) {
     }
 });
 
-Route::post('group_members', function(Request $request) {
+Route::post('group_members', function (Request $request) {
     return App\GroupMember::create([
         'name' => $request->name,
         'email' => $request->email,
@@ -34,46 +34,36 @@ Route::post('group_members', function(Request $request) {
     ])->makeVisible('api_token');
 });
 
-Route::group(['middleware' => ['auth:api']], function() {
-    Route::get('protected', function(Request $request) { return $request->user(); });
+Route::group(['middleware' => ['auth:api']], function () {
+    Route::get('protected', function (Request $request) {
+        return $request->user();
+    });
 
-    Route::get('me', function(Request $request) {
+    Route::get('me', function (Request $request) {
         return App\GroupMember::with('groups')->find($request->user())->first();
     });
-    
-    Route::post('groups', function(Request $request) {
+
+    Route::post('groups', function (Request $request) {
         $group = App\Group::create($request->all());
-        
+
         $user = $request->user();
         $group->members()->save($user);
         $nonMemberEmails = [];
         foreach ($request->members as $email) {
             $member = App\GroupMember::where('email', $email)->first();
-            if($member) {
+            if ($member) {
                 $group->members()->save($member);
             } else {
                 $nonMemberEmails[] = $email;
             }
         }
-        // $group->members()->findOrNew($request->users);
         $group->save();
-        
+
         // I wish I didn't have to make another DB query here
         return App\Group::with('members')->findOrFail($group->id);
     });
 
-    // Route::put('groups/{id}', function(Request $request) {
-    //     $group = App\Group::with('members')->findOrFail($id);
-    //     $user = $request->user();
-    //     if ($group->members()->get()->contains($user)) {
-    //         // make the changes & save the group
-    //         return $group;
-    //     } else {
-    //         abort(403);
-    //     }
-    // });
-
-    Route::post('groups/{id}/transactions', function(Request $request, $id) {
+    Route::post('groups/{id}/transactions', function (Request $request, $id) {
         $group = App\Group::findOrFail($id);
         $user = $request->user();
 
@@ -91,8 +81,10 @@ Route::group(['middleware' => ['auth:api']], function() {
 
         $txn->save();
 
-        $splits = $group->members()->get()->map(function($member) use ($txn, $user, $request, $group) {
-            if ($member->is($user)) {return null;}
+        $splits = $group->members()->get()->map(function ($member) use ($txn, $user, $request, $group) {
+            if ($member->is($user)) {
+                return null;
+            }
 
             return [
                 'transaction' => $txn->id,
@@ -102,15 +94,13 @@ Route::group(['middleware' => ['auth:api']], function() {
             ];
         })->filter()->toArray();
 
-        // dd($splits);
-
         $txn->splits()->createMany($splits);
 
         // I wish I didn't have to make another DB query here
         return App\Transaction::with('splits')->findOrFail($txn->id);
     });
 
-    Route::get('groups/{id}', function(Request $request, $id) {
+    Route::get('groups/{id}', function (Request $request, $id) {
         $group = App\Group::with('members')
             ->with('transactions')
             ->findOrFail($id);
@@ -121,15 +111,4 @@ Route::group(['middleware' => ['auth:api']], function() {
             abort(403);
         }
     });
-
-    // Route::post('reset_token', function(Request $request) {
-    //     $user = $request->user();
-    //     $user->api_token = Str::random(60);
-    //     $user->save();
-    //     return $user->makeVisible('api_token');
-    // })->name('reset_token');
-
-    // Route::get('groups', function() {
-    //     return App\Group::all();
-    // });
 });
