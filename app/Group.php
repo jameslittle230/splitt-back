@@ -15,6 +15,6 @@ class Group extends Model
     }
 
     public function transactions() {
-        return $this->hasMany('App\Transaction', 'group');
+        return $this->hasMany('App\Transaction', 'group')->with('splits');
     }
 }

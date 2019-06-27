@@ -38,10 +38,7 @@ Route::group(['middleware' => ['auth:api']], function() {
     Route::get('protected', function(Request $request) { return $request->user(); });
 
     Route::get('me', function(Request $request) {
-        return App\GroupMember::with('groups')
-            ->with('transactions')
-            ->with('splits')
-            ->find($request->user())->first();
+        return App\GroupMember::with('groups')->find($request->user())->first();
     });
     
     Route::post('groups', function(Request $request) {
@@ -114,7 +111,9 @@ Route::group(['middleware' => ['auth:api']], function() {
     });
 
     Route::get('groups/{id}', function(Request $request, $id) {
-        $group = App\Group::with('members')->with('transactions')->findOrFail($id);
+        $group = App\Group::with('members')
+            ->with('transactions')
+            ->findOrFail($id);
         $user = $request->user();
         if ($group->members()->get()->contains($user)) {
             return $group;
