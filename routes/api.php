@@ -118,6 +118,30 @@ Route::group(['middleware' => ['auth:api']], function () {
         }
     });
 
+    Route::put('groups/{id}', function (Request $request, $id) {
+        $group = App\Group::with('members')->findOrFail($id);
+        
+        $nonMemberEmails = [];
+        foreach ($request->members as $email) {
+            $member = App\GroupMember::where('email', $email)->with('groups')->first();
+            if ($member) {
+                if(!$member->groups()->get()->contains($group)) {
+                    $group->members()->save($member);
+                }
+            } else {
+                $nonMemberEmails[] = $email;
+            }
+        }
+        $group->save();
+
+        // I wish I didn't have to make another DB query here
+        $group = App\Group::with('members')->findOrFail($group->id);
+        return collect([
+            'group' => $group,
+            'nonMemberEmails' => $nonMemberEmails,
+        ]);
+    });
+
     /**
      * Requires that the request have a query key/value pair like
      * q=echinacea@6e29436e
