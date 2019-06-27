@@ -50,9 +50,11 @@ Route::group(['middleware' => ['auth:api']], function () {
         $group->members()->save($user);
         $nonMemberEmails = [];
         foreach ($request->members as $email) {
-            $member = App\GroupMember::where('email', $email)->first();
+            $member = App\GroupMember::where('email', $email)->with('groups')->first();
             if ($member) {
-                $group->members()->save($member);
+                if(!$member->groups()->get()->contains($group)) {
+                    $group->members()->save($member);
+                }
             } else {
                 $nonMemberEmails[] = $email;
             }
