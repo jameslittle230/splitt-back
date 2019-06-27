@@ -116,6 +116,35 @@ Route::group(['middleware' => ['auth:api']], function () {
         }
     });
 
+    /**
+     * Requires that the request have a query key/value pair like
+     * q=echinacea@6e29436e
+     * where `echinacea` is the group name
+     * and `6e29436e` is the first 8 characters of the UUID
+     */
+    Route::get('groupsearch', function (Request $request) {
+        $query = $request->query('q');
+
+        /**
+         * ^: Beginning of line
+         * \w: Any word character ( equal to [a-zA-Z0-9_] )
+         * {3,}: Matches between 3 and unlimited times
+         * @: The literal `@` character
+         * [a-f0-9]: Any character in hex range
+         * {8}: Matches exactly 8 times
+         * $: End of line
+         */
+        if(!preg_match("/^\\w{3,}@[a-f0-9]{8}$/m", $query)) {
+            abort(400);
+        }
+
+        list($name, $uuidPrefix) = explode("@", $query);
+        $groups = App\Group::where('name', 'like', $name)
+            ->where('id', 'like', "$uuidPrefix%")
+            ->get();
+        return $groups;
+    });
+
     Route::put('splits/{id}', function (Request $request, $id) {
         $split = App\Split::findOrFail($id);
         if (!$split->debtor()->first()->is($request->user())) {
