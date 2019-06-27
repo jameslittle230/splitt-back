@@ -8,7 +8,7 @@ class Split extends Model
 {
     use UsesUuid;
 
-    protected $fillable = ['amount', 'percentage', 'debtor'];
+    protected $fillable = ['amount', 'percentage', 'debtor', 'reconciled'];
 
     public function transaction() {
         return $this->belongsTo('App\Transaction', 'transaction');

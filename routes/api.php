@@ -115,4 +115,16 @@ Route::group(['middleware' => ['auth:api']], function () {
             abort(403);
         }
     });
+
+    Route::put('splits/{id}', function (Request $request, $id) {
+        $split = App\Split::findOrFail($id);
+        if (!$split->debtor()->first()->is($request->user())) {
+            abort(403);
+        }
+
+        $input = $request->only(['reconciled']);
+        $split->reconciled = $input['reconciled'];
+        $split->save();
+        return $split;
+    });
 });
