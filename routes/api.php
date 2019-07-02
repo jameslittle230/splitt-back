@@ -73,6 +73,10 @@ Route::group(['middleware' => ['auth:api']], function () {
         $group = App\Group::findOrFail($id);
         $user = $request->user();
 
+        if(!$request->has(['full_amount', 'description', 'splits'])) {
+            abort(403);
+        }
+
         $txn = new App\Transaction();
         $txn->fill([
             'full_amount' => $request->full_amount,
@@ -87,16 +91,19 @@ Route::group(['middleware' => ['auth:api']], function () {
 
         $txn->save();
 
-        $splits = $group->members()->get()->map(function ($member) use ($txn, $user, $request, $group) {
-            if ($member->is($user)) {
+        $splits = collect($request->splits)->map(function ($split) use ($txn, $user) {
+            $debtor = App\GroupMember::where('email', $split["user"])->first();
+
+            // You can't owe money towards yourself
+            if ($debtor->is($user)) {
                 return null;
             }
 
             return [
                 'transaction' => $txn->id,
-                'amount' => (int)($request->full_amount) / ($group->members()->count() - 1),
-                'percentage' => 100 / ($group->members()->count() - 1),
-                'debtor' => $member->id,
+                'amount' => (int)($split["amount"]),
+                'percentage' => (int)($split["percentage"]),
+                'debtor' => $debtor->id,
             ];
         })->filter()->toArray();
 
