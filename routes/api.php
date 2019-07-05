@@ -17,8 +17,8 @@ Route::post('login', function (Request $request) {
     $credentials = $request->only('email', 'password');
     if (Auth::guard('web')->attempt($credentials)) {
         $user = Auth::guard('web')->user();
-        $user->api_token = Str::random(60);
-        $user->save();
+        // $user->api_token = Str::random(60);
+        // $user->save();
         return $user->makeVisible('api_token');
     } else {
         abort(403);
