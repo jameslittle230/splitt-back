@@ -189,4 +189,81 @@ Route::group(['middleware' => ['auth:api']], function () {
         $split->save();
         return $split;
     });
+
+    Route::get('groups/{id}/debts', function(Request $request, $id) {
+        $group = App\Group::with('members')
+            ->with('transactions')
+            ->findOrFail($id);
+        $me = $request->user();
+        
+        // Ensure request user is in group
+        if (!$group->members()->get()->contains($me)) {
+            abort(403);
+        }
+
+        // All unreconciled splits in the group
+        $splits = $group
+            ->transactions()->get()
+            ->map(function($txn) {
+                return $txn->splits()->with('transaction')->get();
+            })->collapse()
+            ->filter(function($split) {
+                return $split->reconciled == 0;
+            });
+
+        return $group
+            ->members()->get()
+            ->filter(function($member) use ($me) {
+                return !$member->is($me);
+            })
+            ->transform(function($member) use ($splits, $me) {
+
+                // The splits I created (txn->creator is me) that $member owes me money for
+                $splitsCreated = $splits
+                    ->filter(function($split) use ($me, $member) {
+                        return $split
+                            ->transaction()->with('creator')->get()[0]
+                            ->creator()->get()[0]
+                            ->is($me)
+                        && $split->debtor()->get()[0]->is($member);
+                    });
+                
+                $splitsCreatedTotal = $splitsCreated
+                    ->map(function($split) { return $split->amount; })
+                    ->sum();
+                
+                $splitsOwed = $splits
+                    ->filter(function($split) use ($me, $member) {
+                        return $split
+                            ->transaction()->with('creator')->get()[0]
+                            ->creator()->get()[0]
+                            ->is($member)
+                        && $split->debtor()->get()[0]->is($me);
+                    });
+                
+                $splitsOwedTotal = $splitsOwed
+                    ->map(function($split) { return $split->amount; })
+                    ->sum();
+
+                return collect([
+                    'member' => $member,
+
+                    // Created: Txns that you created that $member owes you
+                    // money for (money that you have coming in)
+                    'createdTotal' => $splitsCreatedTotal,
+                    'created' => $splitsCreated,
+
+                    // Owed: Txns that $member created that you owe money for
+                    // (money that you have going out)
+                    'owedTotal' => $splitsOwedTotal,
+                    'owed' => $splitsOwed,
+
+                    'net' => $splitsCreatedTotal - $splitsOwedTotal,
+                ]);
+            });
+    });
+
+    Route::put('groups/{id}/debts', function(Request $request, $id) {
+
+    });
 });
