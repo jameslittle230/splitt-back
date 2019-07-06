@@ -264,6 +264,49 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     Route::put('groups/{id}/debts', function(Request $request, $id) {
+        $group = App\Group::with('members')
+            ->with('transactions')
+            ->findOrFail($id);
+        $me = $request->user();
+        
+        // Ensure request user is in group
+        if (!$group->members()->get()->contains($me)) {
+            abort(403);
+        }
 
+        $reconciled = $request->input(['reconciled']);
+
+        $splits = $group
+            ->transactions()->get()
+            ->map(function($txn) {
+                return $txn->splits()->with('transaction')->get();
+            })->collapse()
+            ->filter(function($split) {
+                return $split->reconciled == 0;
+            });
+
+        return collect($reconciled)
+            ->transform(function($shouldReconcile, $member_id) use ($splits, $me) {
+                $member = App\GroupMember::findOrFail($member_id);
+
+                return $splits
+                    ->filter(function($split) use ($me, $member) {
+                        return ($split
+                            ->transaction()->with('creator')->get()[0]
+                            ->creator()->get()[0]
+                            ->is($me)
+                        && $split->debtor()->get()[0]->is($member)) 
+                        || ($split
+                            ->transaction()->with('creator')->get()[0]
+                            ->creator()->get()[0]
+                            ->is($member)
+                        && $split->debtor()->get()[0]->is($me));
+                    })
+                    ->map(function($split) use ($shouldReconcile) {
+                        $split->reconciled = $shouldReconcile;
+                        $split->save();
+                        return $split;
+                    });
+            });
     });
 });
