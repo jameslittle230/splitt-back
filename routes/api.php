@@ -17,8 +17,6 @@ Route::post('login', function (Request $request) {
     $credentials = $request->only('email', 'password');
     if (Auth::guard('web')->attempt($credentials)) {
         $user = Auth::guard('web')->user();
-        // $user->api_token = Str::random(60);
-        // $user->save();
         return $user->makeVisible('api_token');
     } else {
         abort(403);
@@ -26,6 +24,18 @@ Route::post('login', function (Request $request) {
 });
 
 Route::post('group_members', function (Request $request) {
+    if(strlen($request->password) < 8) {
+        abort(400, 'Password is too short. Must be 8 or more characters.');
+    }
+
+    if(strlen($request->name) < 1) {
+        abort(400, 'Name must be longer than 0 characters.');
+    }
+    
+    if(App\GroupMember::where('email', $request->email)->first()) {
+        abort(400, 'A user with this email address already exists.');
+    }
+
     return App\GroupMember::create([
         'name' => $request->name,
         'email' => $request->email,
@@ -35,9 +45,6 @@ Route::post('group_members', function (Request $request) {
 });
 
 Route::group(['middleware' => ['auth:api']], function () {
-    Route::get('protected', function (Request $request) {
-        return $request->user();
-    });
 
     Route::get('me', function (Request $request) {
         return App\GroupMember::with('groups')->find($request->user())->first();
@@ -74,7 +81,7 @@ Route::group(['middleware' => ['auth:api']], function () {
         $user = $request->user();
 
         if(!$request->has(['full_amount', 'description', 'splits'])) {
-            abort(403);
+            abort(403, "Request does not have required parameters.");
         }
 
         $txn = new App\Transaction();
