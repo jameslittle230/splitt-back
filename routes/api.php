@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +91,18 @@ Route::group(['middleware' => ['auth:api']], function () {
             'description' => $request->description,
         ]);
 
+        if($request->altered_date) {
+            $dt = Carbon::createFromFormat("Y-m-d\TH:i:s.v\Z", $request->altered_date)->floorDay();
+            if(!$dt->isToday()) {
+                $txn->fill(['altered_date' => $dt]);
+            }
+        }
+
+        
+        if($request->long_description) {
+            $txn->fill(['long_description' => $request->long_description]);
+        }
+        
         // It seems like the relationship stuff should deal with
         // extracting the IDs for me, instead of me having to
         // do it myself here?

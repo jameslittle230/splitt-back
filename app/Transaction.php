@@ -8,7 +8,7 @@ class Transaction extends Model
 {
     use UsesUuid;
 
-    protected $fillable = ['full_amount', 'description'];
+    protected $fillable = ['full_amount', 'description', 'long_description', 'altered_date'];
 
     public function creator() {
         return $this->belongsTo('App\GroupMember', 'creator');
