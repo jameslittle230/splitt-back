@@ -14,6 +14,10 @@ use Carbon\Carbon;
 |
 */
 
+Route::get('/', function(Request $request) {
+    return redirect("https://splitt.xyz");
+});
+
 Route::post('login', function (Request $request) {
     $credentials = $request->only('email', 'password');
     if (Auth::guard('web')->attempt($credentials)) {
