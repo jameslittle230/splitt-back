@@ -56,6 +56,22 @@ Route::group(['middleware' => ['auth:api']], function () {
     });
 
     Route::post('groups', function (Request $request) {
+        if($request->name == "") {
+            abort(400, "Group name can't be empty.");
+        }
+
+        if(!preg_match("/^(?>[a-z]|-)+$/m", $request->name)) {
+            abort(400, "Invalid group name. Must contain only lower case letters and dashes.");
+        }
+
+        if(!is_array($request->members)) {
+            abort(400, "Members list is not a list.");
+        }
+
+        if(sizeof($request->members) < 1) {
+            abort(400, "Members list is too short.");
+        }
+
         $group = App\Group::create($request->all());
 
         $user = $request->user();
@@ -192,13 +208,18 @@ Route::group(['middleware' => ['auth:api']], function () {
          * $: End of line
          */
         if(!preg_match("/^\\w{3,}@[a-f0-9]{8}$/m", $query)) {
-            abort(400);
+            abort(400, "Invalid join code.");
         }
 
         list($name, $uuidPrefix) = explode("@", $query);
         $groups = App\Group::where('name', 'like', $name)
             ->where('id', 'like', "$uuidPrefix%")
             ->get();
+        
+        if(sizeof($groups) != 1) {
+            abort(400, "No group found.");
+        }
+
         return $groups;
     });
 
