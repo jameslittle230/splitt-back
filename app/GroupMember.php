@@ -38,17 +38,25 @@ class GroupMember extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function groups() {
+    public function groups()
+    {
         return $this
             ->belongsToMany('App\Group', 'group_groupmember', 'groupmember', 'group')
             ->withTimestamps();
     }
 
-    public function transactions() {
+    public function transactions()
+    {
         return $this->hasMany('App\Transaction', 'creator');
     }
 
-    public function splits() {
+    public function splits()
+    {
         return $this->hasMany('App\Split', 'debtor');
+    }
+
+    public function validations()
+    {
+        return $this->hasMany('App\EmailValidation', 'group_member');
     }
 }

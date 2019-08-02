@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Mail\MailtrapExample;
+use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,10 +30,11 @@ Route::post('login', function (Request $request) {
 });
 
 Route::post('group_members', 'GroupMemberController@create');
+Route::get('group_members/verification/{token}', 'GroupMemberController@verify');
 
 Route::group(['middleware' => ['auth:api']], function () {
-
     Route::get('me', 'GroupMemberController@me');
+    Route::delete('group_member/{id}', 'GroupMemberController@delete');
 
     Route::post('groups', 'GroupController@create');
     Route::get('groups/{id}', 'GroupController@get');
@@ -43,4 +46,18 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('groups/{id}/debts', 'DebtController@get');
     Route::put('groups/{id}/debts', 'DebtController@update');
+});
+
+
+
+
+
+
+Route::get('/send-mail', function () {
+    Mail::to('newuser@example.com')->send(new MailtrapExample());
+    return 'A message has been sent to Mailtrap!';
+});
+
+Route::get('/mailable', function () {
+    return new MailtrapExample();
 });
