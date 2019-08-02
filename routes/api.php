@@ -60,8 +60,8 @@ Route::group(['middleware' => ['auth:api']], function () {
             abort(400, "Group name can't be empty.");
         }
 
-        if(!preg_match("/^(?>[a-z]|-)+$/m", $request->name)) {
-            abort(400, "Invalid group name. Must contain only lower case letters and dashes.");
+        if(!preg_match("/^(?>[a-z]|[0-9]|-)+$/m", $request->name)) {
+            abort(400, "Invalid group name. Must contain only lower case letters, dashes, and numbers.");
         }
 
         if(!is_array($request->members)) {
