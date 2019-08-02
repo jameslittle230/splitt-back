@@ -39,7 +39,9 @@ class GroupMember extends Authenticatable
     ];
 
     public function groups() {
-        return $this->belongsToMany('App\Group', 'group_groupmember', 'groupmember', 'group');
+        return $this
+            ->belongsToMany('App\Group', 'group_groupmember', 'groupmember', 'group')
+            ->withTimestamps();
     }
 
     public function transactions() {

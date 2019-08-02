@@ -11,7 +11,9 @@ class Group extends Model
     protected $fillable = ['name'];
 
     public function members() {
-        return $this->belongsToMany('App\GroupMember', 'group_groupmember', 'group', 'groupmember');
+        return $this
+            ->belongsToMany('App\GroupMember', 'group_groupmember', 'group', 'groupmember')
+            ->withTimestamps();
     }
 
     public function transactions() {
