@@ -51,7 +51,7 @@ class DebtController extends Controller
                         $split->date = $altered_date ? $altered_date : $created_at;
                         return $split;
                     })
-                    ->sortBy('date');
+                    ->sortByDesc('date');
 
                 $splitsCreatedTotal = $splitsCreated
                     ->map(function ($split) {
@@ -72,7 +72,7 @@ class DebtController extends Controller
                         $split->date = $altered_date ? $altered_date : $created_at;
                         return $split;
                     })
-                    ->sortBy('date');
+                    ->sortByDesc('date');
 
                 $splitsOwedTotal = $splitsOwed
                     ->map(function ($split) {
