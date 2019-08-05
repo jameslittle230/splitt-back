@@ -42,10 +42,16 @@ class DebtController extends Controller
                     ->filter(function ($split) use ($me, $member) {
                         return $split
                             ->transaction()->with('creator')->get()[0]
-                            ->creator()->get()[0]
-                            ->is($me)
+                            ->creator()->get()[0]->is($me)
                             && $split->debtor()->get()[0]->is($member);
-                    });
+                    })
+                    ->transform(function ($split) {
+                        $altered_date = $split->transaction()->first()->altered_date;
+                        $created_at = $split->transaction()->first()->created_at;
+                        $split->date = $altered_date ? $altered_date : $created_at;
+                        return $split;
+                    })
+                    ->sortBy('date');
 
                 $splitsCreatedTotal = $splitsCreated
                     ->map(function ($split) {
@@ -57,10 +63,16 @@ class DebtController extends Controller
                     ->filter(function ($split) use ($me, $member) {
                         return $split
                             ->transaction()->with('creator')->get()[0]
-                            ->creator()->get()[0]
-                            ->is($member)
+                            ->creator()->get()[0]->is($member)
                             && $split->debtor()->get()[0]->is($me);
-                    });
+                    })
+                    ->transform(function ($split) {
+                        $altered_date = $split->transaction()->first()->altered_date;
+                        $created_at = $split->transaction()->first()->created_at;
+                        $split->date = $altered_date ? $altered_date : $created_at;
+                        return $split;
+                    })
+                    ->sortBy('date');
 
                 $splitsOwedTotal = $splitsOwed
                     ->map(function ($split) {
@@ -74,12 +86,12 @@ class DebtController extends Controller
                     // Created: Txns that you created that $member owes you
                     // money for (money that you have coming in)
                     'createdTotal' => $splitsCreatedTotal,
-                    'created' => $splitsCreated,
+                    'created' => $splitsCreated->values()->all(),
 
                     // Owed: Txns that $member created that you owe money for
                     // (money that you have going out)
                     'owedTotal' => $splitsOwedTotal,
-                    'owed' => $splitsOwed,
+                    'owed' => $splitsOwed->values()->all(),
 
                     'net' => $splitsCreatedTotal - $splitsOwedTotal,
                 ]);
