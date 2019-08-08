@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 
 use App\Transaction;
 use App\GroupMember;
+use App\Group;
 
 class TransactionController extends Controller
 {
     public function create($group_id)
     {
-        $group = App\Group::findOrFail($group_id);
+        $group = Group::findOrFail($group_id);
         $user = request()->user();
 
         if (!request()->has(['full_amount', 'description', 'splits'])) {
@@ -63,6 +64,6 @@ class TransactionController extends Controller
 
         $txn->splits()->createMany($splits);
 
-        return App\Transaction::with('splits')->findOrFail($txn->id);
+        return Transaction::with('splits')->findOrFail($txn->id);
     }
 }
