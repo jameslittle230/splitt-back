@@ -17,7 +17,7 @@ class GroupMember extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'api_token'
+        'name', 'shortname', 'email', 'password', 'api_token', 'timezone', 'self_created'
     ];
 
     /**

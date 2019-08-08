@@ -29,12 +29,23 @@ class GroupMemberController extends Controller
             abort(400, 'A user with this email address already exists.');
         }
 
-        $newGroupMember = GroupMember::create([
+        $newGroupMember = new GroupMember();
+        $newGroupMember->fill([
             'name' => request('name'),
             'email' => request('email'),
             'password' => Hash::make(request('password')),
             'api_token' => Str::random(60),
         ]);
+
+        if(request('shortname')) {
+            $newGroupMember->fill(['shortname' => request('shortname')]);
+        }
+
+        if(request('timezone')) {
+            $newGroupMember->fill(['shortname' => request('timezone')]);
+        }
+
+        $newGroupMember->save();
 
         $newEmailValidation = new EmailValidation();
         $newGroupMember->validations()->save($newEmailValidation);
