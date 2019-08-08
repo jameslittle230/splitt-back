@@ -14,7 +14,7 @@ class AddAlteredDateToTxnsTable extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->date('altered_date')->after('long_description')->nullable();
+            $table->timestamp('altered_date')->after('long_description')->nullable();
         });
     }
 
