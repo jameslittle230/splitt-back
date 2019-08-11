@@ -19,7 +19,7 @@ class CreateSplitsTable extends Migration
             $table->uuid('transaction');
             $table->foreign('transaction')->references('id')->on('transactions');
             $table->integer('amount');
-            $table->integer('percentage');
+            $table->double('percentage', 6, 2);
             $table->uuid('debtor');
             $table->foreign('debtor')->references('id')->on('group_members');
             $table->boolean('reconciled')->default(false);
@@ -33,7 +33,7 @@ class CreateSplitsTable extends Migration
      */
     public function down()
     {
-        Schema::table('splits', function(Blueprint $table) {
+        Schema::table('splits', function (Blueprint $table) {
             $table->dropForeign('transaction');
             $table->dropForeign('debtor');
         });

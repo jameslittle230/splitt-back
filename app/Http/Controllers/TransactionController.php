@@ -57,7 +57,7 @@ class TransactionController extends Controller
             return [
                 'transaction' => $txn->id,
                 'amount' => (int) ($split["amount"]),
-                'percentage' => (int) ($split["percentage"]),
+                'percentage' => (float) ($split["percentage"]),
                 'debtor' => $debtor->id,
             ];
         })->filter()->toArray();
