@@ -26,7 +26,6 @@ Route::post('login', function (Request $request) {
 });
 
 Route::post('group_members', 'GroupMemberController@create');
-Route::get('group_members/verification/{token}', 'GroupMemberController@verify');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('me', 'GroupMemberController@me');

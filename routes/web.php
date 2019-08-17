@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
+Route::get('group_members/verification/{token}', 'GroupMemberController@verify');
+Route::match(['get', 'post'], 'group_members/activation/{user_id}/{password}', 'GroupMemberController@activate')->name('activation');
+
 Route::get('/verified', function (Request $request) {
     return "Email verified!";
 })->name('postEmailVerification');

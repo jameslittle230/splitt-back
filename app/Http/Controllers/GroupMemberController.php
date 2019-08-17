@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
@@ -68,7 +69,48 @@ class GroupMemberController extends Controller
             abort("410", "Verification link expired.");
         }
 
+        $groupMember->email_verified_at = Carbon::now();
+        $groupMember->save();
+
         return redirect()->route('postEmailVerification');
+    }
+
+    public function activate($user_id, $password)
+    {
+        if (!Auth::guard('web')->attempt(['id' => $user_id, 'password' => $password])) {
+            abort('404', "Not found.");
+        }
+
+        $groupMember = GroupMember::findOrFail($user_id);
+
+        if (!$groupMember->isInactive()) {
+            abort('404', "Not found");
+        }
+
+        if (request()->isMethod('post')) {
+            if (strlen(request('password')) < 8) {
+                abort(400, 'Password is too short. Must be 8 or more characters.');
+            }
+
+            if (strlen(request('name')) < 1) {
+                abort(400, 'Name must be longer than 0 characters.');
+            }
+
+            if (request('password') != request('password-c')) {
+                abort(400, 'Password and confirmation must match.');
+            }
+
+            $groupMember->fill([
+                'name' => request('name'),
+                'password' => Hash::make(request('password')),
+                'api_token' => Str::random(60),
+                'email_verified_at' => Carbon::now(),
+            ]);
+            $groupMember->save();
+            return view('activationSuccess', ['user' => $groupMember]);
+        }
+        
+        return view('activationReset', ['user' => $groupMember]);
     }
 
     public function me()

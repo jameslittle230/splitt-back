@@ -2,27 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Group;
 use App\GroupMember;
+use App\Mail\InvitationMail;
 
 class GroupController extends Controller
 {
+    private function sendActivationEmails($emails = [], $group, $user)
+    {
+        collect($emails)->each(function ($email) use ($group, $user) {
+            $newPassword = Str::random(12);
+            $groupMember = new GroupMember();
+            $groupMember->email = $email;
+            $groupMember->self_created = false;
+            $groupMember->password = Hash::make($newPassword);
+            $groupMember->save();
+            Mail::to($email)->send(new InvitationMail($groupMember, $newPassword, $group, $user));
+            $group->members()->save($groupMember);
+        });
+    }
+
     public function create()
     {
-        if(request('name') == "") {
+        if (request('name') == "") {
             abort(400, "Group name can't be empty.");
         }
 
-        if(!preg_match("/^(?>[a-z]|[0-9]|-)+$/m", request('name'))) {
+        if (!preg_match("/^(?>[a-z]|[0-9]|-)+$/m", request('name'))) {
             abort(400, "Invalid group name. Must contain only lower case letters, dashes, and numbers.");
         }
 
-        if(!is_array(request('members'))) {
+        if (!is_array(request('members'))) {
             abort(400, "Members list is not a list.");
         }
 
-        if(sizeof(request('members')) < 1) {
+        if (sizeof(request('members')) < 1) {
             abort(400, "Members list is too short.");
         }
 
@@ -34,7 +51,7 @@ class GroupController extends Controller
         foreach (request('members') as $email) {
             $member = GroupMember::where('email', $email)->with('groups')->first();
             if ($member) {
-                if(!$member->groups()->get()->contains($group)) {
+                if (!$member->groups()->get()->contains($group)) {
                     $group->members()->save($member);
                 }
             } else {
@@ -42,6 +59,8 @@ class GroupController extends Controller
             }
         }
         $group->save();
+
+        $this->sendActivationEmails($nonMemberEmails, $group, $user);
 
         // I wish I didn't have to make another DB query here
         $group = Group::with('members')->findOrFail($group->id);
@@ -85,6 +104,9 @@ class GroupController extends Controller
 
         // I wish I didn't have to make another DB query here
         $group = Group::with('members')->findOrFail($group->id);
+
+        $this->sendActivationEmails($nonMemberEmails, $group, $user);
+
         return collect([
             'group' => $group,
             'nonMemberEmails' => $nonMemberEmails,
