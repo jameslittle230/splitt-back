@@ -10,11 +10,18 @@ class Split extends Model
 
     protected $fillable = ['amount', 'percentage', 'debtor', 'reconciled'];
 
-    public function transaction() {
+    public function transaction()
+    {
         return $this->belongsTo('App\Transaction', 'transaction');
     }
 
-    public function debtor() {
+    public function debtor()
+    {
         return $this->belongsTo('App\GroupMember', 'debtor');
+    }
+
+    public function reconciliation()
+    {
+        return $this->belongsTo('App\Reconciliation', 'reconciliation');
     }
 }
