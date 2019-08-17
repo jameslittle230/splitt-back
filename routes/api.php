@@ -15,10 +15,6 @@ use Illuminate\Support\Facades\Mail;
 |
 */
 
-Route::get('/', function () {
-    return redirect("https://splitt.xyz");
-});
-
 Route::post('login', function (Request $request) {
     $credentials = $request->only('email', 'password');
     if (Auth::guard('web')->attempt($credentials)) {

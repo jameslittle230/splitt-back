@@ -60,4 +60,9 @@ class GroupMember extends Authenticatable
     {
         return $this->hasMany('App\EmailValidation', 'group_member');
     }
+
+    public function isActivated()
+    {
+        return this.name == null && this.self_created == false;
+    }
 }

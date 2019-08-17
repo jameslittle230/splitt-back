@@ -37,11 +37,11 @@ class GroupMemberController extends Controller
             'api_token' => Str::random(60),
         ]);
 
-        if(request('shortname')) {
+        if (request('shortname')) {
             $newGroupMember->fill(['shortname' => request('shortname')]);
         }
 
-        if(request('timezone')) {
+        if (request('timezone')) {
             $newGroupMember->fill(['shortname' => request('timezone')]);
         }
 
@@ -60,18 +60,15 @@ class GroupMemberController extends Controller
         $verification = EmailValidation::findOrFail($verification_id);
         $groupMember = $verification->groupMember()->first();
 
-        if($groupMember->email_verified_at) {
+        if ($groupMember->email_verified_at) {
             abort("410", "Verification link expired.");
         }
 
-        if(!Carbon::now()->isBetween($verification->created_at, $verification->created_at->addHours(48))) {
+        if (!Carbon::now()->isBetween($verification->created_at, $verification->created_at->addHours(48))) {
             abort("410", "Verification link expired.");
         }
 
-        $groupMember->email_verified_at = Carbon::now();
-        $groupMember->save();
-
-        return "Verified!";
+        return redirect()->route('postEmailVerification');
     }
 
     public function me()
