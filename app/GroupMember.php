@@ -36,6 +36,7 @@ class GroupMember extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'self_created' => 'boolean'
     ];
 
     public function groups()

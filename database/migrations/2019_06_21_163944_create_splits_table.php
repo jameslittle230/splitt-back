@@ -22,7 +22,7 @@ class CreateSplitsTable extends Migration
             $table->double('percentage', 6, 2);
             $table->uuid('debtor');
             $table->foreign('debtor')->references('id')->on('group_members');
-            $table->boolean('reconciled')->default(false);
+            $table->uuid('reconciled')->nullable();
         });
     }
 

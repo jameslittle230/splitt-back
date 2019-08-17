@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\GroupMember;
 use App\Group;
+use App\Reconciliation;
 
 class DebtController extends Controller
 {
@@ -27,7 +28,7 @@ class DebtController extends Controller
                 return $txn->splits()->with('transaction')->get();
             })->collapse()
             ->filter(function ($split) {
-                return $split->reconciled == 0;
+                return $split->reconciliation == null;
             });
 
         return $group
@@ -110,7 +111,7 @@ class DebtController extends Controller
             abort(403);
         }
 
-        $reconciled = request()->input(['reconciled']);
+        $reconciled_members = request()->input(['reconciled_members']);
 
         $splits = $group
             ->transactions()->get()
@@ -118,12 +119,13 @@ class DebtController extends Controller
                 return $txn->splits()->with('transaction')->get();
             })->collapse()
             ->filter(function ($split) {
-                return $split->reconciled == 0;
+                return $split->reconciliation == null;
             });
 
-        return collect($reconciled)
-            ->transform(function ($shouldReconcile, $member_id) use ($splits, $me) {
+        return collect($reconciled_members)
+            ->transform(function ($member_id) use ($splits, $me) {
                 $member = GroupMember::findOrFail($member_id);
+                $reconciliation = Reconciliation::create();
 
                 return $splits
                     ->filter(function ($split) use ($me, $member) {
@@ -138,8 +140,8 @@ class DebtController extends Controller
                                 ->is($member)
                                 && $split->debtor()->get()[0]->is($me));
                     })
-                    ->map(function ($split) use ($shouldReconcile) {
-                        $split->reconciled = $shouldReconcile;
+                    ->map(function ($split) use ($reconciliation) {
+                        $split->reconciliation = $reconciliation->id;
                         $split->save();
                         return $split;
                     });
