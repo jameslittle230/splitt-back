@@ -41,20 +41,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 
     Route::get('groups/{id}/debts', 'DebtController@get');
     Route::put('groups/{id}/debts', 'DebtController@update');
+
+    Route::get('groups/{id}/events', 'EventController@all');
 });
 
-
-
-
-
-
-Route::get('/send-mail', function () {
-    Mail::raw('Sending emails with Mailgun and Laravel is easy!', function ($message) {
-        $message->subject('Mailgun and Laravel are awesome!');
-        $message->to('littleguy23@gmail.com');
-    });
-});
-
-Route::get('/mailable', function () {
-    return new MailtrapExample();
-});

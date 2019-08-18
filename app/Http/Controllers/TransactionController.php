@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Event;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 
@@ -63,6 +64,15 @@ class TransactionController extends Controller
         })->filter()->toArray();
 
         $txn->splits()->createMany($splits);
+
+        $event = new Event();
+        $event->fill([
+            'group_id' => $group_id,
+            'subject' => $user->id,
+            'verb' => 'createdTransaction',
+            'object' => $txn->id,
+        ]);
+        $event->save();
 
         return Transaction::with('splits')->findOrFail($txn->id);
     }

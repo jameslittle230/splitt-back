@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\GroupMember;
 use App\Group;
 use App\Reconciliation;
+use App\Event;
 
 class DebtController extends Controller
 {
@@ -122,10 +123,21 @@ class DebtController extends Controller
                 return $split->reconciliation == null;
             });
 
+
         return collect($reconciled_members)
-            ->transform(function ($member_id) use ($splits, $me) {
+            ->transform(function ($member_id) use ($splits, $me, $group_id) {
                 $member = GroupMember::findOrFail($member_id);
                 $reconciliation = Reconciliation::create();
+
+                $event = new Event();
+                $event->fill([
+                    'group_id' => $group_id,
+                    'subject' => $me->id,
+                    'verb' => 'createdReconciliation',
+                    'object' => $reconciliation->id,
+                ]);
+                $event->save();
+
 
                 return $splits
                     ->filter(function ($split) use ($me, $member) {
