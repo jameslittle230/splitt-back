@@ -115,7 +115,8 @@ class GroupMemberController extends Controller
 
     public function me()
     {
-        return GroupMember::with('groups')->find(request()->user())->first();
+        // dd(request()->user());
+        return GroupMember::with('groups')->findOrFail(request()->user()->id);
     }
 
     public function delete($id)
