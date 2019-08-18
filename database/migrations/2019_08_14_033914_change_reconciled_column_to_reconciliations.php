@@ -15,7 +15,7 @@ class ChangeReconciledColumnToReconciliations extends Migration
     {
         Schema::table('splits', function (Blueprint $table) {
             $table->renameColumn('reconciled', 'reconciliation');
-            $table->foreign('transaction')->references('id')->on('transactions');
+            $table->foreign('reconciliation')->references('id')->on('reconciliations');
         });
     }
 
