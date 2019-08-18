@@ -16,13 +16,18 @@ class CreateSplitsTable extends Migration
         Schema::create('splits', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->timestamps();
+            
             $table->uuid('transaction');
             $table->foreign('transaction')->references('id')->on('transactions');
+            
             $table->integer('amount');
             $table->double('percentage', 6, 2);
+            
             $table->uuid('debtor');
             $table->foreign('debtor')->references('id')->on('group_members');
-            $table->uuid('reconciled')->nullable();
+
+            $table->uuid('reconciliation')->nullable();
+            $table->foreign('reconciliation')->references('id')->on('reconciliations');
         });
     }
 
