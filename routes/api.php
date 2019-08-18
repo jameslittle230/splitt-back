@@ -49,8 +49,10 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 
 Route::get('/send-mail', function () {
-    Mail::to('newuser@example.com')->send(new MailtrapExample());
-    return 'A message has been sent to Mailtrap!';
+    Mail::raw('Sending emails with Mailgun and Laravel is easy!', function ($message) {
+        $message->subject('Mailgun and Laravel are awesome!');
+        $message->to('littleguy23@gmail.com');
+    });
 });
 
 Route::get('/mailable', function () {

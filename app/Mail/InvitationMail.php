@@ -35,8 +35,7 @@ class InvitationMail extends Mailable
      */
     public function build()
     {
-        return $this->from('no-reply@splitt.xyz', 'Splitt')
-            ->subject("{$this->invitingUser->name} wants you to join Splitt.")
+        return $this->subject("{$this->invitingUser->name} wants you to join Splitt.")
             ->markdown('mails.invitation')
             ->with([
                 'email' => $this->newUser->email,

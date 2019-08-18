@@ -32,8 +32,7 @@ class UserVerificationMail extends Mailable
      */
     public function build()
     {
-        return $this->from('no-reply@splitt.xyz', 'Splitt')
-            ->subject('Validate your Splitt account')
+        return $this->subject('Validate your Splitt account')
             ->markdown('mails.userverification')
             ->with([
                 'name' => $this->user->name,
