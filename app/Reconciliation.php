@@ -3,14 +3,15 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Split;
 
 class Reconciliation extends Model
 {
     use UsesUuid;
 
+    protected $with = ['splits'];
+
     public function splits()
     {
-        return $this->hasMany('Split', 'reconciliation');
+        return $this->hasMany('App\Split', 'reconciliation');
     }
 }

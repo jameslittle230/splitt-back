@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Event;
 use App\Group;
-use App\GroupMember;
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EventController extends Controller
 {
@@ -19,6 +16,8 @@ class EventController extends Controller
         }
 
         return Event::where('group_id', $group_id)
-         ->with(['subject', 'object'])->get();
+         ->with(['subject', 'object'])
+         ->orderBy('created_at', 'desc')
+         ->get();
     }
 }

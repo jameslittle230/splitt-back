@@ -105,6 +105,8 @@ class GroupController extends Controller
         // I wish I didn't have to make another DB query here
         $group = Group::with('members')->findOrFail($group->id);
 
+        $user = request()->user();
+
         $this->sendActivationEmails($nonMemberEmails, $group, $user);
 
         return collect([
