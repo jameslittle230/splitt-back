@@ -17,8 +17,8 @@ class AddEventTable extends Migration
             $table->uuid('id')->primary();
             
             $table->uuid('group_id');
-            $table->foreign('group_id')->references('id')->on('groups')
-            ;
+            $table->foreign('group_id')->references('id')->on('groups');
+            
             $table->uuid('subject');
             $table->string('verb');
             $table->uuid('object');

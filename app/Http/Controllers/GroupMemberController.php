@@ -115,12 +115,17 @@ class GroupMemberController extends Controller
 
     public function me()
     {
-        // dd(request()->user());
         return GroupMember::with('groups')->findOrFail(request()->user()->id);
     }
 
     public function delete($id)
     {
-        return response("Not implemented yet", 404);
+        if ($id != request()->user()->id) {
+            abort(403, 'Deleting other users is forbidden.');
+        }
+
+        // @TODO: Think through how deleting users should work. What happens
+        // to all the groups/txns/debts they have?
+        // GroupMember::findOrFail($id)->delete();
     }
 }

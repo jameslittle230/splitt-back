@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Mail\MailtrapExample;
-use Illuminate\Support\Facades\Mail;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +28,7 @@ Route::post('group_members', 'GroupMemberController@create');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('me', 'GroupMemberController@me');
-    Route::delete('group_member/{id}', 'GroupMemberController@delete');
+    Route::delete('group_members/{id}', 'GroupMemberController@delete');
 
     Route::post('groups', 'GroupController@create');
     Route::get('groups/{id}', 'GroupController@get');
