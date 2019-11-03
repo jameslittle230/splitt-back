@@ -23,6 +23,10 @@ class Event extends Model
         'createdReconciliation' => [
             'subject' => 'App\GroupMember',
             'object' => 'App\Reconciliation',
+        ],
+        'undidEvent' => [
+            'subject' => 'App\GroupMember',
+            'object' => 'App\Event',
         ]
     ];
 
@@ -32,6 +36,7 @@ class Event extends Model
             'createdTransaction' => 'App\GroupMember',
             'addedGroupMember' => 'App\GroupMember',
             'createdReconciliation' => 'App\GroupMember',
+            'undidEvent' => 'App\GroupMember',
         ]);
 
         return $this->morphTo('subject', 'verb', 'subject', 'id');
@@ -43,6 +48,7 @@ class Event extends Model
             'createdTransaction' => 'App\Transaction',
             'addedGroupMember' => 'App\GroupMember',
             'createdReconciliation' => 'App\Reconciliation',
+            'undidEvent' => 'App\Event',
         ]);
 
         return $this->morphTo('object', 'verb', 'object', 'id');

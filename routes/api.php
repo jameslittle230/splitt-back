@@ -25,6 +25,7 @@ Route::post('login', function (Request $request) {
     }
 });
 
+Route::get('undoable_verbs', 'EventController@undoableVerbs');
 Route::post('group_members', 'GroupMemberController@create');
 
 Route::group(['middleware' => ['auth:api']], function () {
@@ -43,5 +44,6 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::put('groups/{id}/debts', 'DebtController@update');
 
     Route::get('groups/{id}/events', 'EventController@all');
-});
 
+    Route::post('events/{id}/undo', 'EventController@undo');
+});
