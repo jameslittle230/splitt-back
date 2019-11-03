@@ -3,10 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Split extends Model
 {
     use UsesUuid;
+    use SoftDeletes;
 
     protected $fillable = ['amount', 'percentage', 'debtor', 'reconciled'];
 
